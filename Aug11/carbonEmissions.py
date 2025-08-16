@@ -14,5 +14,5 @@ main = os.getcwd()
 # Download files from the week, which you can then read in locally
 #pydytuesday.get_date('2025-08-12')
 
-data = pd.read_csv('attribution_studies.csv')
+data = pd.read_csv('data/attribution_studies.csv')
 #data cleaning
