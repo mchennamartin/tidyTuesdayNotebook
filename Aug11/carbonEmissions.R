@@ -68,6 +68,7 @@ plotsDir <- file.path(mainDir, 'plots')
 setwd(mainDir)
 
 #read in tables---------------------------------------------
+
 #data cleaning --------------------------------------------
 attribution_studies_raw <- readr::read_csv(
   file.path(dataDir, 'attribution_studies_raw.csv')
@@ -136,15 +137,33 @@ attribution_studies <- attribution_studies_raw |>
   ) |>
   dplyr::select(!event_year_trend)
 
+
 #fix tables------------------------------------------------
 studies <- attribution_studies_raw
 #rename columns
 colnames(studies) <- c('name', 'year', 'iso', 'region', 'type', 'classification', 'summary', 'publication',
                        'citation', 'source', 'rapid', 'link')
-studies$length <- studies$year
+studies$length <- as.character(studies$year)
 #create column defining whether it is a trend or event
 trend <- grepl('Trend', studies$year)
-studies[trend, 'length']<- 'Longitudinal'
-studies['length' != 'Trend'] <- ''
+#change elements based on whether it is a trend or event
+studies[trend, 'length'] <- 'Longitudinal'
+studies[!trend, 'length'] <- 'Event'
 
-#removing dates
+#change year to NA where longitudinal
+studies[trend, 'year'] <- NA
+
+#add seasons
+
+#add winter to column for winter events
+temp <- grepl('winter|Winter|January|Febuary|December', studies$name)
+studies[temp, 'seasons'] <- 'Winter'
+#add spring, summer, fall
+temp <- grepl('spring|Spring|March|April|May', studies$name)
+studies[temp, 'seasons'] <- 'Spring'
+temp <- grepl('summer|Summer|June|July|August', studies$name)
+studies[temp, 'seasons'] <- 'Summer'
+temp <- grepl('Fall|autumn|Autumn|September|October|November', studies$name)
+studies[temp, 'seasons'] <- 'Fall'
+
+#add 
