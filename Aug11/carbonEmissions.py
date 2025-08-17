@@ -1,5 +1,4 @@
 #import modules
-from xml.dom.minidom import NamedNodeMap
 
 import os
 import re
@@ -10,7 +9,7 @@ import pandas as pd
 #import plotly as ptly
 
 #file locations
-main = Path()
+main = Path(os.getcwd())
 
 # Download files from the week, which you can then read in locally
 #pydytuesday.get_date('2025-08-12')
@@ -39,5 +38,3 @@ data.loc[temp, 'season'] = 'Summer'
 supp = data[['link', 'citation']]
 data = data.drop(['link', 'citation'], axis=1)
 
-#clean up
-data['classification'] = data['classification'].str.replace('Insufficient data/inconclusive', 'Inconclusive')
