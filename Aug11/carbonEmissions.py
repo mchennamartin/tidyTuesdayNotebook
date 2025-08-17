@@ -12,7 +12,7 @@ import pandas as pd
 main = Path(os.getcwd())
 
 # Download files from the week, which you can then read in locally
-#pydytuesday.get_date('2025-08-12')
+#pydytuesday.get_date('2025-08-12')---------------------------------------------
 
 data = pd.read_csv(main / 'Aug11' / 'data' / 'attribution_studies.csv')
 
@@ -38,3 +38,20 @@ data.loc[temp, 'season'] = 'Summer'
 supp = data[['link', 'citation']]
 data = data.drop(['link', 'citation'], axis=1)
 
+#extract counts for certain events---------------------------------------------
+counts = pd.DataFrame()
+tempSeries = pd.Series(data["event_year"])
+#make function that adds counts to each year when '-' is present
+def tempFunction(series):
+    for i in series.count():
+        #if multiple years, add 1 to each year in counts frame
+        if '-' in series[[i]]:
+            temp = series[[i]].split('-')
+            a = temp[0]
+            b = temp[1]
+
+
+#if not multiple years just tally single year
+
+tempSeries = s
+counts['pubs_per_year'] = tempSeries.value_counts()
