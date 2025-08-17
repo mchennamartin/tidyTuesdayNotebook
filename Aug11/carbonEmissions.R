@@ -153,7 +153,7 @@ studies[!trend, 'length'] <- 'Event'
 #change year to NA where longitudinal
 studies[trend, 'year'] <- NA
 
-#add seasons
+#add seasons column
 
 #add winter to column for winter events
 temp <- grepl('winter|Winter|January|Febuary|December', studies$name)
@@ -166,4 +166,4 @@ studies[temp, 'seasons'] <- 'Summer'
 temp <- grepl('Fall|autumn|Autumn|September|October|November', studies$name)
 studies[temp, 'seasons'] <- 'Fall'
 
-#add 
+#add
