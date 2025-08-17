@@ -166,4 +166,4 @@ studies[temp, 'seasons'] <- 'Summer'
 temp <- grepl('Fall|autumn|Autumn|September|October|November', studies$name)
 studies[temp, 'seasons'] <- 'Fall'
 
-#add
+#do some plots, make universal functions up here---------------------------
