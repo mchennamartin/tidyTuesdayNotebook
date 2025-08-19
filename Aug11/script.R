@@ -1,28 +1,28 @@
-#initialize----------------------------------------
-#custom package function to avoid extra inputs when changing r versions
+# initialize----------------------------------------
+# custom package function to avoid extra inputs when changing r versions
 load <- function(package){
-  #package - character - represents package or packages to install e.g. 'dplyr', 'limma'
+  # package - character - represents package or packages to install e.g. 'dplyr', 'limma'
 
   #determine whether it is one package or a list of them, by detecting commas
   checkList <- grepl(', ', package)
-  #if package variable has commas, checkList will return True
+  # if package variable has commas, checkList will return True
 
-  #for listed input
+  # for listed input
   if(checkList == TRUE){
-    #create list type from character/string
+    # create list type from character/string
     packageList <- strsplit(package, ', ')
     packageList <- packageList[[1]]
 
-    #look at number of elements in packageList
+    # look at number of elements in packageList
     packageNumber <- length(packageList)
 
-    #create loop with length equal to number of packages
+    # create loop with length equal to number of packages
     for(i in 1:packageNumber){
       if(!require(packageList[[i]], character.only = TRUE)){
         install.packages(packageList[[i]], ask = FALSE)
       }
-      #check to see if package installed, or if there was an error.
-      #if packages is not installed yet, repeat with biocmanager
+      # check to see if package installed, or if there was an error.
+      # if packages is not installed yet, repeat with biocmanager
       if(!require(packageList[[i]], character.only = TRUE)){
         if (!require("BiocManager", quietly = TRUE))
         install.packages("BiocManager")
@@ -30,7 +30,7 @@ load <- function(package){
         BiocManager::install(packageList[[i]], ask = FALSE)
        }
 
-    #load package into environment
+    # load package into environment
     library(packageList[[i]], character.only = TRUE)
     }
     }
@@ -56,7 +56,7 @@ load <- function(package){
 
   }
 
-#load packages
+# load packages
 load('tidyverse, here, janitor')
 
 #define directories
@@ -67,9 +67,10 @@ plotsDir <- file.path(mainDir, 'plots')
 #set working directory
 setwd(mainDir)
 
-#read in tables---------------------------------------------
-
-#data cleaning --------------------------------------------
+# read in tables---------------------------------------------
+  rawData <- read.csv(file.path(dataDir, 'attribution_studies_raw.csv') )
+  data <- read.csv(file.path(dataDir, 'attribution_studies.csv'))
+# data cleaning --------------------------------------------
 attribution_studies_raw <- readr::read_csv(
   file.path(dataDir, 'attribution_studies_raw.csv')
 ) |>
@@ -166,4 +167,26 @@ studies[temp, 'seasons'] <- 'Summer'
 temp <- grepl('Fall|autumn|Autumn|September|October|November', studies$name)
 studies[temp, 'seasons'] <- 'Fall'
 
-#do some plots, make universal functions up here---------------------------
+#extract counts of certain events -----------------------
+countMatrix <-
+#do some plots ---------------------------
+
+#plot functions
+
+simpleBoxPlot <- function(table, independent, dependent){
+  #This function creates a boxplot using an independent and dependent variable
+  #input independent and dependent variables as strings E.g 'size','volume'
+  #table = data frame
+  #Independent = string representing column with numeric values (qualitative)
+  #Dependent = String representing table column with qualitative values (quantitative)
+
+  p <- ggboxplot(table, x=independent,y=dependent,
+                 color=independent, palette =c("#00AFBB", "#E7B800", '#FF7F00'),
+                 add="jitter",shape=independent)
+
+  print(p)
+}
+
+#plots
+
+simpleBoxPlot(studies, 'seasons', )

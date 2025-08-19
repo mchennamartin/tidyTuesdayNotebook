@@ -39,19 +39,27 @@ supp = data[['link', 'citation']]
 data = data.drop(['link', 'citation'], axis=1)
 
 #extract counts for certain events---------------------------------------------
+#make counts table
 counts = pd.DataFrame()
-tempSeries = pd.Series(data["event_year"])
-#make function that adds counts to each year when '-' is present
-def tempFunction(series):
-    for i in series.count():
-        #if multiple years, add 1 to each year in counts frame
-        if '-' in series[[i]]:
-            temp = series[[i]].split('-')
-            a = temp[0]
-            b = temp[1]
+tempSeries = pd.Series(data["event_period"])
+#add year column to counts table
+counts['year'] = 1800
 
+#make loop that adds counts to each year when '-' is present
+for i in len(tempSeries):
+   #if multiple years, add 1 to each year in counts frame
+    if '-' in tempSeries[[i]]:
+        temp = counts[[i]].split('-')
+        a = temp[0]
+        b = temp[1]
+        for year in temp[0]:temp[1]:
+            counts[] =
+        # for i in 30 add 1 to column[year]
 
-#if not multiple years just tally single year
+    #if 'since' is involved use event_period year and publication year
+    if 'since' in temp[[i]]:
+    #if not multiple years just tally single year
+
 
 tempSeries = s
 counts['pubs_per_year'] = tempSeries.value_counts()
