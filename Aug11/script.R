@@ -66,18 +66,18 @@ load <- function(package){
 load('tidyverse, here, janitor')
 
 # define directories
-mainDir <- file.path(here(), 'Aug11')
-dataDir <- file.path(mainDir, 'data')
-plotsDir <- file.path(mainDir, 'plots')
+dir_main <- file.path(here(), 'Aug11')
+dir_data <- file.path(dir_main, 'data')
+dir_plots <- file.path(dir_main, 'plots')
 
 # set working directory
-setwd(mainDir)
+setwd(dir_main)
 
 # READ IN TABLES---------------------------------------------
-  rawData <- read.csv(file.path(dataDir, 'attribution_studies_raw.csv') ) |>
+  data_raw <- read.csv(file.path(dir_data, 'attribution_studies_raw.csv') ) |>
             janitor::clean_names()
 
-  data <- read.csv(file.path(dataDir, 'attribution_studies.csv')) |>
+  data <- read.csv(file.path(dir_data, 'attribution_studies.csv')) |>
           janitor::clean_names()
 
 # DATA CLEANING (me) ----------------------------------
@@ -85,7 +85,7 @@ setwd(mainDir)
 
 # DATA CLEANING --------------------------------------------
 attribution_studies_raw <- readr::read_csv(
-  file.path(dataDir, 'attribution_studies_raw.csv')
+  file.path(dir_data, 'attribution_studies_raw.csv')
 ) |>
   janitor::clean_names()
 
