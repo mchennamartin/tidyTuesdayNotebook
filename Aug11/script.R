@@ -71,6 +71,7 @@ setwd(mainDir)
 # READ IN TABLES---------------------------------------------
   rawData <- read.csv(file.path(dataDir, 'attribution_studies_raw.csv') ) |>
             janitor::clean_names()
+
   data <- read.csv(file.path(dataDir, 'attribution_studies.csv')) |>
           janitor::clean_names()
 
