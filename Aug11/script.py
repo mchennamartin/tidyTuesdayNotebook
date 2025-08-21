@@ -53,7 +53,7 @@ for i in len(tempSeries):
         a = temp[0]
         b = temp[1]
         for year in temp[0]:temp[1]:
-            counts[] =
+            counts[''] =
         # for i in 30 add 1 to column[year]
 
     #if 'since' is involved use event_period year and publication year
