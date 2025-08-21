@@ -1,5 +1,6 @@
-# initialize----------------------------------------
-# custom package function to avoid extra inputs when changing r versions
+
+# INITIALIZE----------------------------------------
+# custom package function to avoid manual downloads when changing r versions
 load <- function(package){
   # package - character - represents package or packages to install e.g. 'dplyr', 'limma'
 
@@ -59,18 +60,24 @@ load <- function(package){
 # load packages
 load('tidyverse, here, janitor')
 
-#define directories
+# define directories
 mainDir <- file.path(here(), 'Aug11')
 dataDir <- file.path(mainDir, 'data')
 plotsDir <- file.path(mainDir, 'plots')
 
-#set working directory
+# set working directory
 setwd(mainDir)
 
-# read in tables---------------------------------------------
-  rawData <- read.csv(file.path(dataDir, 'attribution_studies_raw.csv') )
-  data <- read.csv(file.path(dataDir, 'attribution_studies.csv'))
-# data cleaning --------------------------------------------
+# READ IN TABLES---------------------------------------------
+  rawData <- read.csv(file.path(dataDir, 'attribution_studies_raw.csv') ) |>
+            janitor::clean_names()
+  data <- read.csv(file.path(dataDir, 'attribution_studies.csv')) |>
+          janitor::clean_names()
+
+# DATA CLEANING (me) ----------------------------------
+#use janitor, tabyls,
+
+# DATA CLEANING --------------------------------------------
 attribution_studies_raw <- readr::read_csv(
   file.path(dataDir, 'attribution_studies_raw.csv')
 ) |>
@@ -139,27 +146,27 @@ attribution_studies <- attribution_studies_raw |>
   dplyr::select(!event_year_trend)
 
 
-#fix tables------------------------------------------------
+# FIX TABLES------------------------------------------------
 studies <- attribution_studies_raw
-#rename columns
+# rename columns
 colnames(studies) <- c('name', 'year', 'iso', 'region', 'type', 'classification', 'summary', 'publication',
                        'citation', 'source', 'rapid', 'link')
 studies$length <- as.character(studies$year)
-#create column defining whether it is a trend or event
+# create column defining whether it is a trend or event
 trend <- grepl('Trend', studies$year)
-#change elements based on whether it is a trend or event
+# change elements based on whether it is a trend or event
 studies[trend, 'length'] <- 'Longitudinal'
 studies[!trend, 'length'] <- 'Event'
 
-#change year to NA where longitudinal
+# change year to NA where longitudinal
 studies[trend, 'year'] <- NA
 
-#add seasons column
+# add seasons column
 
-#add winter to column for winter events
+# add winter to column for winter events
 temp <- grepl('winter|Winter|January|Febuary|December', studies$name)
 studies[temp, 'seasons'] <- 'Winter'
-#add spring, summer, fall
+# add spring, summer, fall
 temp <- grepl('spring|Spring|March|April|May', studies$name)
 studies[temp, 'seasons'] <- 'Spring'
 temp <- grepl('summer|Summer|June|July|August', studies$name)
@@ -167,18 +174,17 @@ studies[temp, 'seasons'] <- 'Summer'
 temp <- grepl('Fall|autumn|Autumn|September|October|November', studies$name)
 studies[temp, 'seasons'] <- 'Fall'
 
-#extract counts of certain events -----------------------
+# EXTRACT COUNTS -----------------------
 countMatrix <-
-#do some plots ---------------------------
-
-#plot functions
+# PLOTS  ---------------------------
+# plot functions
 
 simpleBoxPlot <- function(table, independent, dependent){
-  #This function creates a boxplot using an independent and dependent variable
-  #input independent and dependent variables as strings E.g 'size','volume'
-  #table = data frame
-  #Independent = string representing column with numeric values (qualitative)
-  #Dependent = String representing table column with qualitative values (quantitative)
+  # This function creates a boxplot using an independent and dependent variable
+  # input independent and dependent variables as strings E.g 'size','volume'
+  # table = data frame
+  # Independent = string representing column with numeric values (qualitative)
+  # Dependent = String representing table column with qualitative values (quantitative)
 
   p <- ggboxplot(table, x=independent,y=dependent,
                  color=independent, palette =c("#00AFBB", "#E7B800", '#FF7F00'),
@@ -187,6 +193,5 @@ simpleBoxPlot <- function(table, independent, dependent){
   print(p)
 }
 
-#plots
-
+# make plots
 simpleBoxPlot(studies, 'seasons', )
