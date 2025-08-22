@@ -4,11 +4,11 @@
 load <- function(package){
   # package - character - represents package or packages to install e.g. 'dplyr', 'limma'
 
-  # determine whether it is one package or a list of them, by detecting commas
+  # check if input is one package or a list of them, by detecting any commas
   check_if_list <- any(grepl(',' , package))
-  # if package variable has commas, checkList will return True
+  # if package variable has commas, check_if_list will return True
 
-  # for listed input
+  # For listed input
   if(check_if_list == TRUE){
     # create list type from character/string
     package_list <- strsplit(package, ', ')
@@ -41,7 +41,7 @@ load <- function(package){
     }
 
 
-  # for sole input
+  # For sole input
   if(check_if_list == FALSE){
      if(!require(package, character.only = TRUE)){
         install.packages(package, ask = FALSE)
@@ -61,27 +61,25 @@ load <- function(package){
 
   }
 
+# Load packages
+load('tidyverse, here, janitor, glue')
 
-# load packages
-load('tidyverse, here, janitor')
-
-# define directories
+# Define directories
 dir_main <- file.path(here(), 'Aug11')
 dir_data <- file.path(dir_main, 'data')
 dir_plots <- file.path(dir_main, 'plots')
 
-# set working directory
+# Set working directory
 setwd(dir_main)
 
-# READ IN TABLES---------------------------------------------
+# READ IN TABLES ---------------------------------------------
   data_raw <- read.csv(file.path(dir_data, 'attribution_studies_raw.csv') ) |>
             janitor::clean_names()
 
-  data <- read.csv(file.path(dir_data, 'attribution_studies.csv')) |>
+  data_autoclean <- read.csv(file.path(dir_data, 'attribution_studies.csv')) |>
           janitor::clean_names()
 
-# DATA CLEANING (me) ----------------------------------
-#use janitor, tabyls,
+
 
 # DATA CLEANING --------------------------------------------
 attribution_studies_raw <- readr::read_csv(
@@ -116,7 +114,7 @@ clean_date_string <- function(col) {
 
 # Data Cleaning ----------------------------------------------------------
 
-attribution_studies <- attribution_studies_raw |>
+data <- attribution_studies_raw |>
   janitor::clean_names() |>
   # Separate event names from time periods
   # and split them into separate 'event_name' and 'event_period' columns
@@ -152,45 +150,37 @@ attribution_studies <- attribution_studies_raw |>
   dplyr::select(!event_year_trend)
 
 
-# FIX TABLES------------------------------------------------
-studies <- attribution_studies_raw
-# rename columns
-colnames(studies) <- c('name', 'year', 'iso', 'region', 'type', 'classification', 'summary', 'publication',
-                       'citation', 'source', 'rapid', 'link')
-studies$length <- as.character(studies$year)
-# create column defining whether it is a trend or event
-trend <- grepl('Trend', studies$year)
-# change elements based on whether it is a trend or event
-studies[trend, 'length'] <- 'Longitudinal'
-studies[!trend, 'length'] <- 'Event'
+# ADJUST TABLES------------------------------------------------
 
-# change year to NA where longitudinal
-studies[trend, 'year'] <- NA
-
-# add seasons column
-
+# Add seasons column
+#TODO inverse seasons for southern hemisphere
 # add winter to column for winter events
-temp <- grepl('winter|Winter|January|Febuary|December', studies$name)
-studies[temp, 'seasons'] <- 'Winter'
+temp <- grepl('winter|Winter|January|Febuary|December', data$event_name)
+data[temp, 'seasons'] <- 'Winter'
 # add spring, summer, fall
-temp <- grepl('spring|Spring|March|April|May', studies$name)
-studies[temp, 'seasons'] <- 'Spring'
-temp <- grepl('summer|Summer|June|July|August', studies$name)
-studies[temp, 'seasons'] <- 'Summer'
-temp <- grepl('Fall|autumn|Autumn|September|October|November', studies$name)
-studies[temp, 'seasons'] <- 'Fall'
+temp <- grepl('spring|Spring|March|April|May', data$event_name)
+data[temp, 'seasons'] <- 'Spring'
+temp <- grepl('summer|Summer|June|July|August', data$event_name)
+data[temp, 'seasons'] <- 'Summer'
+temp <- grepl('Fall|autumn|Autumn|September|October|November', data$event_name)
+data[temp, 'seasons'] <- 'Fall'
+
 
 # EXTRACT COUNTS -----------------------
-countMatrix <-
+# make a matrix with counts of each event for each year
+count_matrix_years <- data |>
+  # filter to rows only containing years
+  filter(!is.na(event_year))|>
+  tabyl(publication_year, classification, cb_region)
+
 # PLOTS  ---------------------------
 # plot functions
-
-simpleBoxPlot <- function(table, independent, dependent){
+simple_boxplot <- function(table, independent, dependent){
   # This function creates a boxplot using an independent and dependent variable
   # input independent and dependent variables as strings E.g 'size','volume'
   # table = data frame
-  # Independent = string representing column with numeric values (qualitative)
-  # Dependent = String representing table column with qualitative values (quantitative)
+  # independent = string representing column with numeric values (qualitative)
+  # dependent = string representing table column with qualitative values (quantitative)
 
   p <- ggboxplot(table, x=independent,y=dependent,
                  color=independent, palette =c("#00AFBB", "#E7B800", '#FF7F00'),
@@ -200,4 +190,17 @@ simpleBoxPlot <- function(table, independent, dependent){
 }
 
 # make plots
-simpleBoxPlot(studies, 'seasons', )
+simple_boxplot(studies, 'seasons', )
+
+# make stacked histogram with facets,
+# each facet should be a season, x as publication year, y as number of pubs per event type
+data_seasons <- data |>
+  filter(!is.na(seasons))
+
+ggplot(data, aes(x = publication_year, fill = classification)) +
+  geom_histogram(position = 'stack') +
+  facet_wrap(~event_type, ncol = 4)
+
+
+
+
