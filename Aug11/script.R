@@ -198,7 +198,10 @@ data_seasons <- data |>
 
 ggplot(data, aes(x = publication_year, fill = classification)) +
   geom_histogram(position = 'stack') +
-  facet_wrap(~event_type, ncol = 4)
+  facet_wrap(~event_type, ncol = 4) +
+  labs(title = "Attribution Studies by Event Type",
+       x = 'Year',
+       y = 'Number of Publications')
 
 
 
