@@ -190,7 +190,6 @@ simple_boxplot <- function(table, independent, dependent){
 }
 
 # make plots
-simple_boxplot(studies, 'seasons', )
 
 # make stacked histogram with facets,
 # each facet should be a season, x as publication year, y as number of pubs per event type
