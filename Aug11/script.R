@@ -165,6 +165,15 @@ data[temp, 'seasons'] <- 'Summer'
 temp <- grepl('Fall|autumn|Autumn|September|October|November', data$event_name)
 data[temp, 'seasons'] <- 'Fall'
 
+# Consolidate Event Types
+data <- data |>
+  mutate(event_type = case_when(
+    grepl('Drought|Wildfire', event_type) ~ "Drought-Related",
+    TRUE ~ event_type
+  )) |>
+   mutate(event_type = case_when(
+     grepl("Ocean | Atmosphere", event_type) ~ "Ocean "
+   ))
 
 # EXTRACT COUNTS -----------------------
 # make a matrix with counts of each event for each year
@@ -202,6 +211,8 @@ ggplot(data, aes(x = publication_year, fill = classification)) +
   labs(title = "Attribution Studies by Event Type",
        x = 'Year',
        y = 'Number of Publications')
+
+
 
 
 
