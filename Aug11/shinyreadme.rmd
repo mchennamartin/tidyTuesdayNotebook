@@ -1,0 +1,199 @@
+---
+title: "R Notebook"
+output: html_document
+runtime: shiny
+---
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r include = FALSE}
+
+# INITIALIZE----------------------------------------
+# custom package function to avoid manual downloads when changing r versions
+load <- function(package){
+  # package - character - represents package or packages to install e.g. 'dplyr', 'limma'
+
+  # check if input is one package or a list of them, by detecting any commas
+  check_if_list <- any(grepl(',' , package))
+  # if package variable has commas, check_if_list will return True
+
+  # For listed input
+  if(check_if_list == TRUE){
+    # create list type from character/string
+    package_list <- strsplit(package, ', ')
+    package_list <- package_list[[1]]
+
+    # look at number of elements in packageList
+    number_of_packages <- length(package_list)
+
+    # create loop with length equal to number of packages
+    for(i in 1:number_of_packages){
+
+      # if package isn't installed, install it
+      if(!require(package_list[[i]], character.only = TRUE)){
+        install.packages(package_list[[i]], ask = FALSE)
+      }
+
+      # if packages is still not installed yet, biocmanager installer is required
+      if(!require(package_list[[i]], character.only = TRUE)){
+        if (!require("BiocManager", quietly = TRUE))
+        install.packages("BiocManager")
+
+        BiocManager::install(package_list[[i]], ask = FALSE)
+       }
+
+    # load package into environment once installed
+
+    library(package_list[[i]], character.only = TRUE)
+
+    }
+    }
+
+
+  # For sole input
+  if(check_if_list == FALSE){
+     if(!require(package, character.only = TRUE)){
+        install.packages(package, ask = FALSE)
+      }
+
+    # load package into environment
+    library(package, character.only = TRUE)
+    }
+
+  }
+
+# Load packages
+load('tidyverse, here, janitor, glue, pandoc, quarto')
+
+```
+
+```{r include = FALSE}
+#make server function
+server <- function(input, output, session){
+    # Get and clean data
+    attribution_studies_raw <- readr::read_csv(
+      "https://interactive.carbonbrief.org/attribution-studies/data/papers-download.csv"
+    ) |>
+      janitor::clean_names()
+
+
+      # Helper functions -------------------------------------------------------
+
+      # Function to standardize year spans to consistent yyyy-yyyy format
+      clean_yearspan <- function(match) {
+        # Split the span using "-" as a delimiter
+        parts <- stringr::str_split(match, "-")[[1]]
+        start_year <- as.numeric(parts[1])
+        # Extract century from start year (e.g. 20 from 2020)
+        century <- start_year %/% 100
+        # Combine the years
+        glue::glue("{parts[1]}-{century}{parts[2]}")
+      }
+
+      # Function to clean and standardize data strings
+      clean_date_string <- function(col) {
+        col |>
+          stringr::str_replace_all("–", "-") |>
+          # Find yyyy-yy patters and convert to yyyy-yyyy
+          stringr::str_replace_all("(\\d{4})-(\\d{2}$)", \(match) {
+            clean_yearspan(match)
+          }) |>
+          stringr::str_replace_all(" & ", ", ")
+      }
+
+      # Data Cleaning ----------------------------------------------------------
+
+      data <- attribution_studies_raw |>
+        janitor::clean_names() |>
+        # Separate event names from time periods
+        # and split them into separate 'event_name' and 'event_period' columns
+        tidyr::separate_wider_regex(
+          name,
+          patterns = c(
+            event_name = ".*",
+            ", ",
+            event_period = ".*",
+            "\\s\\(.*"
+          ),
+          too_few = "align_start"
+        ) |>
+        # Create standardized variables
+        dplyr::mutate(
+          event_year_trend = clean_date_string(event_year_trend),
+          event_period = dplyr::case_when(
+            is.na(event_period) & event_year_trend != "Trend" ~
+              dplyr::coalesce(event_period, event_year_trend),
+            TRUE ~ event_period
+          ) |>
+            clean_date_string(),
+          event_year = dplyr::case_when(
+            event_year_trend != "Trend" ~ event_year_trend,
+            TRUE ~ NA_character_
+          ),
+          study_focus = dplyr::case_when(
+            event_year_trend == "Trend" ~ "Trend",
+            TRUE ~ "Event",
+          ),
+          .before = iso_country_code
+        ) |>
+        dplyr::select(!event_year_trend)
+
+  #fix event types to give more information
+ data <- data |>
+  mutate(event_type = case_when(
+    grepl('Drought|Wildfire|Sunshine', event_type) ~ "Drought-Related",
+    TRUE ~ event_type
+  )) |>
+   mutate(event_type = case_when(
+     grepl("Ocean | Atmosphere", event_type) ~ "Ocean & Atmosphere"
+   )) |>
+   mutate(event_type = case_when())
+
+  #output plots
+  #output$plot1
+
+
+ }
+```
+
+
+
+```{r echo = FALSE}
+# Define UI for the application ----
+ui <- fluidPage(
+
+  titlePanel(glue("Attribution publications in {region}")),
+
+  # Sidebar layout with input and output definitions ----
+  sidebarLayout(
+    selectInput(
+    "select",
+    "Select options below:"
+    multiple = TRUE
+  ),
+    # Sidebar panel for inputs ----
+    sidebarPanel(
+
+    ),
+
+    # Main panel for outputs ----
+    mainPanel(
+    )
+  )
+)
+# Define server logic  ----
+server <- function(input, output) {
+
+    output <- ggplot(data_filtered, aes(x = publication_year, fill = classification)) +
+              geom_histogram(position = 'stack') +
+              facet_wrap(~event_type, ncol = 4) +
+              labs(title = "Attribution Studies by Event Type",
+                   x = 'Year',
+                   y = 'Number of Publications')
+}
+
+shinyApp(ui, server)
+```
+
+
