@@ -168,12 +168,20 @@ data[temp, 'seasons'] <- 'Fall'
 # Consolidate Event Types
 data <- data |>
   mutate(event_type = case_when(
-    grepl('Drought|Wildfire', event_type) ~ "Drought-Related",
+    grepl('Drought|Wildfire|Heat', event_type) ~ "Heat & Drought-Related",
     TRUE ~ event_type
   )) |>
-   mutate(event_type = case_when(
-     grepl("Ocean | Atmosphere", event_type) ~ "Ocean "
-   ))
+  mutate(event_type = case_when(
+    grepl('Colorado river drought|Colorado River discharge deficit', event_name) ~ "Heat & Drought-Related",
+    TRUE ~ event_type
+   )) |>
+  mutate(event_type = case_when(
+    grepl("Ocean|Atmosphere", event_type) ~ "Ocean &  Atmosphere",
+    TRUE ~ event_type
+   ))|>
+  mutate(event_type = case_when(
+    grepl("Susquehanna River extreme streamflow", event_name) ~ "Rain & flooding",
+    TRUE ~ event_type))
 
 # EXTRACT COUNTS -----------------------
 # make a matrix with counts of each event for each year
@@ -210,7 +218,8 @@ ggplot(data, aes(x = publication_year, fill = classification)) +
   facet_wrap(~event_type, ncol = 4) +
   labs(title = "Attribution Studies by Event Type",
        x = 'Year',
-       y = 'Number of Publications')
+       y = 'Number of Publications') +
+  geom_hline(yintercept = 0, linewidth = .2)
 
 
 
