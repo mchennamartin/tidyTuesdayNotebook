@@ -3,7 +3,7 @@ title: "R Notebook"
 output: md_document
 ---
 
-```{r results = 'hide'}
+```{r include = FALSE}
 
 # INITIALIZE----------------------------------------
 # custom package function to avoid manual downloads when changing r versions
@@ -73,7 +73,7 @@ load('tidyverse, here, janitor, glue, pandoc, quarto')
 ```
 
 
-```{r results = 'hide'}
+```{r include = FALSE}
 # read in table and clean
 attribution_studies_raw <- readr::read_csv(
   "https://interactive.carbonbrief.org/attribution-studies/data/papers-download.csv"
@@ -163,7 +163,7 @@ data <- data |>
 ```
 
 
-```{r echo = FALSE}
+```{r echo = FALSE, message = FALSE}
 #plots
 
 p <- ggplot(data, aes(x = publication_year, fill = classification)) +
