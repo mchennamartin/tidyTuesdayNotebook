@@ -216,6 +216,7 @@ ggplot(data, aes(x = publication_year, fill = classification)) +
        x = 'Year',
        y = 'Number of Publications') +
   geom_hline(yintercept = 0, linewidth = .2)
+
 dev.off()
 
 
