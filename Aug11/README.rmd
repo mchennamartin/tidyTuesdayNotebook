@@ -3,7 +3,7 @@ title: "R Notebook"
 output: md_document
 ---
 
-```{r include = FALSE}
+```{r results = 'hide'}
 
 # INITIALIZE----------------------------------------
 # custom package function to avoid manual downloads when changing r versions
@@ -73,7 +73,7 @@ load('tidyverse, here, janitor, glue, pandoc, quarto')
 ```
 
 
-```{r include = FALSE}
+```{r results = 'hide'}
 # read in table and clean
 attribution_studies_raw <- readr::read_csv(
   "https://interactive.carbonbrief.org/attribution-studies/data/papers-download.csv"
@@ -166,12 +166,13 @@ data <- data |>
 ```{r echo = FALSE}
 #plots
 
-ggplot(data, aes(x = publication_year, fill = classification)) +
+p <- ggplot(data, aes(x = publication_year, fill = classification)) +
   geom_histogram(position = 'stack') +
   facet_wrap(~event_type, ncol = 4) +
   labs(title = "Attribution Studies by Event Type",
        x = 'Year',
        y = 'Number of Publications')
+
+print(p)
 ```
-Now, click the **Run** button on the chunk toolbar to [execute](https://www.jetbrains.com/help/pycharm/r-markdown.html#run-r-code) the chunk code. The result should be placed under the chunk.
-Click the **Knit and Open Document** to build and preview an output.
+
