@@ -176,19 +176,13 @@ data <- data |>
     TRUE ~ event_type
    )) |>
   mutate(event_type = case_when(
-    grepl("Ocean|Atmosphere", event_type) ~ "Ocean &  Atmosphere",
+    grepl("Sunshine|Ocean|Atmosphere", event_type) ~ "Sunshine, Ocean &  Atmosphere",
     TRUE ~ event_type
    ))|>
   mutate(event_type = case_when(
     grepl("Susquehanna River extreme streamflow", event_name) ~ "Rain & flooding",
     TRUE ~ event_type))
 
-# EXTRACT COUNTS -----------------------
-# make a matrix with counts of each event for each year
-count_matrix_years <- data |>
-  # filter to rows only containing years
-  filter(!is.na(event_year))|>
-  tabyl(publication_year, classification, cb_region)
 
 # PLOTS  ---------------------------
 # plot functions
@@ -213,6 +207,8 @@ simple_boxplot <- function(table, independent, dependent){
 data_seasons <- data |>
   filter(!is.na(seasons))
 
+
+png("README_files/figure-markdown_strict/plot.png", width = 900 , height = 600)
 ggplot(data, aes(x = publication_year, fill = classification)) +
   geom_histogram(position = 'stack') +
   facet_wrap(~event_type, ncol = 4) +
@@ -220,7 +216,7 @@ ggplot(data, aes(x = publication_year, fill = classification)) +
        x = 'Year',
        y = 'Number of Publications') +
   geom_hline(yintercept = 0, linewidth = .2)
-
+dev.off()
 
 
 
