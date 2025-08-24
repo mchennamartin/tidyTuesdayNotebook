@@ -3,7 +3,7 @@ title: "R Notebook"
 output: md_document
 ---
 
-```{r include = FALSE}
+```{r echo = FALSE}
 
 # INITIALIZE----------------------------------------
 # custom package function to avoid manual downloads when changing r versions
@@ -73,7 +73,7 @@ load('tidyverse, here, janitor, glue, pandoc, quarto')
 ```
 
 
-```{r include = FALSE}
+```{r echo = FALSE}
 # read in table and clean
 attribution_studies_raw <- readr::read_csv(
   "https://interactive.carbonbrief.org/attribution-studies/data/papers-download.csv"
