@@ -62,7 +62,7 @@ load <- function(package){
   }
 
 # Load packages
-load('tidyverse, here, janitor, glue')
+load('tidyverse, here, janitor, glue, ggthemes')
 
 # Define directories
 dir_main <- file.path(here(), 'Aug11')
@@ -152,19 +152,6 @@ data <- attribution_studies_raw |>
 
 # ADJUST TABLES------------------------------------------------
 
-# Add seasons column
-#TODO inverse seasons for southern hemisphere
-# add winter to column for winter events
-temp <- grepl('winter|Winter|January|Febuary|December', data$event_name)
-data[temp, 'seasons'] <- 'Winter'
-# add spring, summer, fall
-temp <- grepl('spring|Spring|March|April|May', data$event_name)
-data[temp, 'seasons'] <- 'Spring'
-temp <- grepl('summer|Summer|June|July|August', data$event_name)
-data[temp, 'seasons'] <- 'Summer'
-temp <- grepl('Fall|autumn|Autumn|September|October|November', data$event_name)
-data[temp, 'seasons'] <- 'Fall'
-
 # Consolidate Event Types
 data <- data |>
   mutate(event_type = case_when(
@@ -185,12 +172,7 @@ data <- data |>
 
 
 # PLOTS  ---------------------------
-# make stacked histogram with facets,
-# each facet should be a season, x as publication year, y as number of pubs per event type
-data_seasons <- data |>
-  filter(!is.na(seasons))
-
-
+# make stacked histogram with facets
 png("README_files/figure-markdown_strict/plot.png", width = 900 , height = 600)
 ggplot(data, aes(x = publication_year, fill = classification)) +
   geom_histogram(position = 'stack') +
@@ -198,7 +180,8 @@ ggplot(data, aes(x = publication_year, fill = classification)) +
   labs(title = "Attribution Studies by Event Type",
        x = 'Year',
        y = 'Number of Publications') +
-  geom_hline(yintercept = 0, linewidth = .2)
+  geom_hline(yintercept = 0, linewidth = .2) +
+  scale_fill_economist()
 
 dev.off()
 
