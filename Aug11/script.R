@@ -185,23 +185,6 @@ data <- data |>
 
 
 # PLOTS  ---------------------------
-# plot functions
-simple_boxplot <- function(table, independent, dependent){
-  # This function creates a boxplot using an independent and dependent variable
-  # input independent and dependent variables as strings E.g 'size','volume'
-  # table = data frame
-  # independent = string representing column with numeric values (qualitative)
-  # dependent = string representing table column with qualitative values (quantitative)
-
-  p <- ggboxplot(table, x=independent,y=dependent,
-                 color=independent, palette =c("#00AFBB", "#E7B800", '#FF7F00'),
-                 add="jitter",shape=independent)
-
-  print(p)
-}
-
-# make plots
-
 # make stacked histogram with facets,
 # each facet should be a season, x as publication year, y as number of pubs per event type
 data_seasons <- data |>
