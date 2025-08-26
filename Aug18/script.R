@@ -70,7 +70,7 @@ data_reshaped[temp, "Classification"] <- "NA"
 # Exploraroty plots ------------------------------------------------------
 #  Make plot where heights of hills are displayed, showing relative height of cutoffs;
 #  classifications shown in blue munroe, white for top, and grey for NA
-
+png('heights.png')
 ggplot(data_reshaped, aes(
    x = Year,
    y = Height_ft,
@@ -81,7 +81,7 @@ ggplot(data_reshaped, aes(
   labs(title = "Heights and Classifications of Munros Over Time",
        y = "Heights in feet") +
   geom_hline(yintercept = 0)
-
+dev.off()
 # MAPPING ----------------------------
 # Make a coordinate map with munroes and tops displayed as spots on coordinate
 # peaks as large dots, tops as small dots
@@ -124,7 +124,7 @@ coords_UK <- map_UK |>
 
 
 # Make map -------------------------------------
-png("map.png", width = 1200, height = 750)
+png("plot.png", width = 1200, height = 750)
 ggplot(coords_UK) +
   geom_sf() +
   facet_wrap(~Year) +
