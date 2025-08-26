@@ -22,21 +22,12 @@ load <- function(package){
       # if package isn't installed, install it
       if(!require(package_list[[i]], character.only = TRUE)){
         install.packages(package_list[[i]], ask = FALSE)
-      }
-
-      # if packages is still not installed yet, biocmanager installer is required
-      if(!require(package_list[[i]], character.only = TRUE)){
-        if (!require("BiocManager", quietly = TRUE))
-        install.packages("BiocManager")
-
-        BiocManager::install(package_list[[i]], ask = FALSE)
-       }
+      } }
 
     # load package into environment once installed
 
     library(package_list[[i]], character.only = TRUE)
 
-    }
     }
 
 
@@ -48,20 +39,15 @@ load <- function(package){
       # check to see if package installed, or if there was an error.
       # if packages is not installed yet, repeat with biocmanager
       if(!require(package, character.only = TRUE)){
-        if (!require("BiocManager", quietly = TRUE))
-        install.packages("BiocManager")
-
-        BiocManager::install(package, ask = FALSE)
-       }
 
     # load package into environment
     library(package, character.only = TRUE)
     }
 
-  }
+  }}
 
 # Load packages
-load('tidyverse, here, janitor, glue, ggthemes')
+load('sf, maps, tidyverse, here, janitor, glue, ggthemes')
 
 # Define directory
 directory <- file.path(here(), 'Aug18')
@@ -96,9 +82,26 @@ ggplot(data_reshaped, aes(
        y = "Heights in feet") +
   geom_hline(yintercept = 0)
 
-
+# Mapping ----------------------------
 # Make a coordinate map with munroes and tops displayed as spots on coordinate
 # peaks as large dots, tops as small dots
 
+#transform data
+data_mapping <- data |>
+  select("Name", "xcoord", "ycoord", "1891", "2021") |>
+  filter(!is.na(ycoord) | !is.na(xcoord))
+
+# add latitude and longitude to data_mapping
+coords <- st_as_sf(data_mapping,
+                   coords = c('xcoord', 'ycoord'),
+                   crs = 27700)
+coords <- st_coordinates(coords)
+
+data_mapping <- data_mapping |>
+  mutate(long = coords[,1],
+         lat = coords[,2])
+
+# get map of UK
+map_UK <- map_data("world", region = "UK")
 
 
