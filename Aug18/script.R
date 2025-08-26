@@ -47,7 +47,7 @@ load <- function(package){
   }}
 
 # Load packages
-load('sf, maps, tidyverse, here, janitor, glue, ggthemes')
+load('sf, tidyverse, here, ggthemes')
 
 # Define directory
 directory <- file.path(here(), 'Aug18')
@@ -82,25 +82,61 @@ ggplot(data_reshaped, aes(
        y = "Heights in feet") +
   geom_hline(yintercept = 0)
 
-# Mapping ----------------------------
+# MAPPING ----------------------------
 # Make a coordinate map with munroes and tops displayed as spots on coordinate
 # peaks as large dots, tops as small dots
 
-#transform data
+# Make Map Data ---------------------------------
 data_mapping <- data |>
   select("Name", "Height_m", "xcoord", "ycoord", "1891", "2021") |>
-  filter(!is.na(ycoord) | !is.na(xcoord))
+  filter(!is.na(ycoord) | !is.na(xcoord)) |>
+  pivot_longer(
+    cols = c("1891", "2021"),
+    names_to = "Year" ,
+    values_to = "Classification")
 
 # add latitude and longitude to data_mapping
 coords <- st_as_sf(data_mapping,
                    coords = c('xcoord', 'ycoord'),
                    crs = 27700)
-data_mapping <- st_transform(coords, 4326)
+coords <- st_transform(coords, 4326) |> st_coordinates()
+
+data_mapping <- data_mapping |>
+  mutate(
+    long = coords[,1],
+    lat = coords[,2])
 
 
-# get map of UK
-map_UK <- map_data("world", region = "UK")
+
+# Make background map ------------------------------
+# get map of UK, exclude southern portion of map
+map_UK <- map_data("world", region = "UK") |>
+  filter(lat > 56, lat <59)
+
 map_UK <- st_as_sf(map_UK,
                    coords = c('long', 'lat'),
                    crs = 4326)
+# convert type from point to polygon map
+coords_UK <- map_UK |>
+  group_by(group) |>
+  summarize(do_union = FALSE) |>
+  st_cast("POLYGON")
+
+
+# Make map -------------------------------------
+png("map.png", width = 1200, height = 750)
+ggplot(coords_UK) +
+  geom_sf() +
+  facet_wrap(~Year) +
+  geom_point(data = data_mapping, aes(
+    x = long,
+    y = lat,
+    color = Classification)) +
+  labs(title = "Map of Munros Within Scotland",
+       x = "Longitude",
+       y = "Latitude") +
+  scale_color_wsj()
+dev.off()
+
+
 
