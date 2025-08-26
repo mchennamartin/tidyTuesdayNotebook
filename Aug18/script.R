@@ -88,20 +88,19 @@ ggplot(data_reshaped, aes(
 
 #transform data
 data_mapping <- data |>
-  select("Name", "xcoord", "ycoord", "1891", "2021") |>
+  select("Name", "Height_m", "xcoord", "ycoord", "1891", "2021") |>
   filter(!is.na(ycoord) | !is.na(xcoord))
 
 # add latitude and longitude to data_mapping
 coords <- st_as_sf(data_mapping,
                    coords = c('xcoord', 'ycoord'),
                    crs = 27700)
-coords <- st_coordinates(coords)
+data_mapping <- st_transform(coords, 4326)
 
-data_mapping <- data_mapping |>
-  mutate(long = coords[,1],
-         lat = coords[,2])
 
 # get map of UK
 map_UK <- map_data("world", region = "UK")
-
+map_UK <- st_as_sf(map_UK,
+                   coords = c('long', 'lat'),
+                   crs = 4326)
 
