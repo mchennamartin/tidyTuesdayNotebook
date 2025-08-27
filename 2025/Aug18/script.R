@@ -47,7 +47,7 @@ load <- function(package){
   }}
 
 # Load packages
-load('sf, tidyverse, here, ggthemes')
+load('sf, maps, tidyverse, here, ggthemes')
 
 # Define directory
 directory <- file.path(here(), '')
