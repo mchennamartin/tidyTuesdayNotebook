@@ -53,11 +53,38 @@ frogID_data <- readr::read_csv('https://raw.githubusercontent.com/rfordatascienc
 frog_names <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-09-02/frog_names.csv')
 
 # Tidy up data ------------------------------------
+# Tidy up frogID_data
+# separate hour, minute, remove seconds
+frogID_data_cleaned <- frogID_data |>
+  separate(
+    col = eventTime,
+    into = c("Hours", "Minutes", "Seconds"),
+    sep = ":"
+  )   |>
+  select(-"Seconds") |>
+# TODO remove .00, .0 from recordedBy
+  mutate(
+    recordedBy = str_remove(recordedBy, "\\..*"),
+    recordedBy = str_remove(, "\\..*"))
+# TODO change time zones to GMT +900
+
+# TODO change some column names to be more descriptive
+
+
+# Tidy up frog_names
+# TODO separate genus and epithet from scientific name
+# TODO remove rows with NAs in the epithet
+# TODO replace empty values with NAs
+# 
+
+
 
 # Make plots --------------------------------------
+# standardize time to eliminate need for time zone; will use GMT +900
+
 
 # Prepare data for shiny app --------------------
 # map of australia with marks for each frog sighting
-# shiny app will allow users to pick from frog subfamily and tribes
+# shiny app will allow users to pick from frog genus and species
 # visualizes the location and time of year of each sound ID for that subfamily/tribe
-#input: roller
+# hovering over the dots should allow user to see/get collection information
