@@ -65,7 +65,7 @@ load <- function(package){
 load('tidyverse, here, janitor, glue, ggthemes')
 
 # Define directories
-dir_main <- file.path(here(), 'Aug11')
+dir_main <- file.path(here(), '')
 dir_data <- file.path(dir_main, 'data')
 dir_plots <- file.path(dir_main, 'plots')
 

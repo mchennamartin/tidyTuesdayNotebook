@@ -50,7 +50,7 @@ load <- function(package){
 load('sf, tidyverse, here, ggthemes')
 
 # Define directory
-directory <- file.path(here(), 'Aug18')
+directory <- file.path(here(), '')
 
 # Download data
 data <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-08-19/scottish_munros.csv')
