@@ -46,7 +46,7 @@ load <- function(package){
   }}
 
 # Load packages
-load('sf, ozmaps, tidyverse, here, ggthemes')
+load('sf, janitor, tidyverse, here, ggthemes')
 
 # Read in tables
 frogID_data <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-09-02/frogID_data.csv')
@@ -54,18 +54,25 @@ frog_names <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience
 
 # Tidy up data ------------------------------------
 # Tidy up frogID_data
-# separate hour, minute, remove seconds
+new_colnames <- c("occurenceID", "eventID", "lat", "long",
+                  "latin_name", "event_date", "event_time", "timezone",
+                  "coord_uncertainty_m", "userID", "province")
+
 frogID_data_cleaned <- frogID_data |>
+  #rename columns
+  setNames(new_colnames) |>
+  #separate event_time into columns Hours and minutes
   separate(
-    col = eventTime,
-    into = c("Hours", "Minutes", "Seconds"),
-    sep = ":"
-  )   |>
-  select(-"Seconds") |>
-# TODO remove .00, .0 from recordedBy
+    col = event_time,
+    into = c("hours", "minutes", "seconds"),
+    sep = ":") |>
+  select(-"seconds") |>
+#rename columns
   mutate(
-    recordedBy = str_remove(recordedBy, "\\..*"),
-    recordedBy = str_remove(, "\\..*"))
+    userID = str_remove(userID, "\\..*"),
+    coord_uncertainty_m = signif(coord_uncertainty_m, digits = 2))
+
+
 # TODO change time zones to GMT +900
 
 # TODO change some column names to be more descriptive
@@ -82,6 +89,7 @@ frogID_data_cleaned <- frogID_data |>
 # Make plots --------------------------------------
 # standardize time to eliminate need for time zone; will use GMT +900
 
+# make gif of frog encounters over time
 
 # Prepare data for shiny app --------------------
 # map of australia with marks for each frog sighting
