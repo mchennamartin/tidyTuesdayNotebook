@@ -1,6 +1,7 @@
 # Initialize ---------------------------
 load <- function(package){
   # package - character - represents package or packages to install e.g. 'dplyr', 'limma'
+  # output - loaded packages, and installed packages if needed
 
   # check if input is one package or a list of them, by detecting any commas
   check_if_list <- any(grepl(',' , package))
@@ -59,24 +60,22 @@ new_colnames <- c("occurenceID", "eventID", "lat", "long",
                   "coord_uncertainty_m", "userID", "province")
 
 frogID_data_cleaned <- frogID_data |>
-  #rename columns
+  # rename columns to be less cumbersome
   setNames(new_colnames) |>
-  #separate event_time into columns Hours and minutes
+  # separate event_time into columns Hours and minutes
   separate(
     col = event_time,
     into = c("hours", "minutes", "seconds"),
     sep = ":") |>
   select(-"seconds") |>
-#rename columns
+  # fix sigfigs of some columns
+  # reduces size of DataFrame
   mutate(
     userID = str_remove(userID, "\\..*"),
-    coord_uncertainty_m = signif(coord_uncertainty_m, digits = 2))
+    coord_uncertainty_m = signif(coord_uncertainty_m, digits = 2)) |>
 
-
-# TODO change time zones to GMT +900
-
-# TODO change some column names to be more descriptive
-
+  # split up latin name into genus and epithet
+  # this makes it easier to group maps by genus/epithet in shiny app
 
 # Tidy up frog_names
 # TODO separate genus and epithet from scientific name
