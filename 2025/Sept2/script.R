@@ -82,11 +82,7 @@ new_colnames <- c("subfamily", "tribe", "latin_name", "common_name", "secondary_
 
 frog_names_cleaned <- frog_names |>
   #rename columns
-  setNames(new_colnames) |>
-  mutate(across(where(is.character), na_if, ""))
-
-# TODO remove rows with NAs in the species column
-# TODO replace empty values with NAs
+  setNames(new_colnames)
 
 # Make sf object with map of Australia
 aus_map <- map_data("world", "Australia")
@@ -105,7 +101,14 @@ frogmap_data <- frogID_data_cleaned |>
     col = "latin_name",
     into = c("genus", "species"),
     sep = " "
-  )
+  ) |>
+#separate year, month, day
+  separate(
+    col = "event_date",
+    into = c("year", "month", "day"),
+    sep = "-"
+  ) |>
+  #change months from numbers to names
 
 # make a map of where observations occur for each subfamily
 ggplot(aus_map) +
@@ -116,6 +119,11 @@ ggplot(aus_map) +
                  color = subfamily)) +
   scale_color_few(palette = "Medium")
 
+# make histogram of frog encounters(subfamily, genus) per province(stack),
+ggplot(frogmap_data, aes(y = subfamily,
+                         fill = hours)) +
+  geom_histogram(stat = "count") +
+  facet_wrap(~ province, scales = "free_y")
 # make gif of frog encounters over time
 
 # Prepare data for shiny app --------------------
