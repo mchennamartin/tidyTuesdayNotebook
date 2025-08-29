@@ -1,4 +1,6 @@
 # Initialize ---------------------------
+# Functions
+#function to donwload and load packages if needed
 load <- function(package){
   # package - character - represents package or packages to install e.g. 'dplyr', 'limma'
   # output - loaded packages, and installed packages if needed
@@ -46,8 +48,9 @@ load <- function(package){
 
   }}
 
+
 # Load packages
-load('sf, janitor, tidyverse, here, ggthemes')
+load('sf, maps, tidyverse, here, ggthemes')
 
 # Read in tables
 frogID_data <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-09-02/frogID_data.csv')
@@ -72,21 +75,46 @@ frogID_data_cleaned <- frogID_data |>
   # reduces size of DataFrame
   mutate(
     userID = str_remove(userID, "\\..*"),
-    coord_uncertainty_m = signif(coord_uncertainty_m, digits = 2)) |>
-
-  # split up latin name into genus and epithet
-  # this makes it easier to group maps by genus/epithet in shiny app
+    coord_uncertainty_m = signif(coord_uncertainty_m, digits = 2))
 
 # Tidy up frog_names
-# TODO separate genus and epithet from scientific name
-# TODO remove rows with NAs in the epithet
+new_colnames <- c("subfamily", "tribe", "latin_name", "common_name", "secondary_common_names")
+
+frog_names_cleaned <- frog_names |>
+  #rename columns
+  setNames(new_colnames) |>
+  mutate(across(where(is.character), na_if, ""))
+
+# TODO remove rows with NAs in the species column
 # TODO replace empty values with NAs
-# 
 
-
+# Make sf object with map of Australia
+aus_map <- map_data("world", "Australia")
+aus_map <- st_as_sf(aus_map,
+                    coords = c("long", "lat"),
+                    crs = 4326) |>
+  group_by(group) |>
+  summarize(do_union = FALSE) |>
+  st_cast("POLYGON")
 
 # Make plots --------------------------------------
-# standardize time to eliminate need for time zone; will use GMT +900
+# create data frame tidied to make plot
+frogmap_data <- frogID_data_cleaned |>
+  left_join(frog_names_cleaned, relationship = "many-to-many") |>
+  separate(
+    col = "latin_name",
+    into = c("genus", "species"),
+    sep = " "
+  )
+
+# make a map of where observations occur for each subfamily
+ggplot(aus_map) +
+  geom_sf() +
+  geom_point(data = frogmap_data,  size = 0.5,
+             aes(x = long,
+                 y = lat,
+                 color = subfamily)) +
+  scale_color_few(palette = "Medium")
 
 # make gif of frog encounters over time
 
