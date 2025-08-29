@@ -107,8 +107,8 @@ frogmap_data <- frogID_data_cleaned |>
     col = "event_date",
     into = c("year", "month", "day"),
     sep = "-"
-  ) |>
-  #change months from numbers to names
+  )
+#TODO something is making december disappear now....
 
 # make a map of where observations occur for each subfamily
 ggplot(aus_map) +
@@ -119,7 +119,18 @@ ggplot(aus_map) +
                  color = subfamily)) +
   scale_color_few(palette = "Medium")
 
-# make histogram of frog encounters(subfamily, genus) per province(stack),
+# make histogram of frog encounters(subfamily, month) per province(stack),
+# this should tell us if there's any difference in monthly reports between the
+ggplot(frogmap_data, aes(y = province,
+                         fill = month)) +
+  geom_histogram(stat = "count")
+
+#how about hour?
+ggplot(frogmap_data, aes(y = province,
+                         fill = hours)) +
+  geom_histogram(stat = "count")
+
+# how does
 ggplot(frogmap_data, aes(y = subfamily,
                          fill = hours)) +
   geom_histogram(stat = "count") +
