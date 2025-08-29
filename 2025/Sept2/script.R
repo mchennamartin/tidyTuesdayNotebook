@@ -66,11 +66,11 @@ frogID_data_cleaned <- frogID_data |>
   # rename columns to be less cumbersome
   setNames(new_colnames) |>
   # separate event_time into columns Hours and minutes
-  separate(
-    col = event_time,
-    into = c("hours", "minutes", "seconds"),
-    sep = ":") |>
-  select(-"seconds") |>
+# separate(
+#   col = event_time,
+#   into = c("hours", "minutes", "seconds"),
+#   sep = ":") |>
+# select(-"seconds") |>
   # fix sigfigs of some columns
   # reduces size of DataFrame
   mutate(
@@ -97,6 +97,13 @@ aus_map <- st_as_sf(aus_map,
 # create data frame tidied to make plot
 frogmap_data <- frogID_data_cleaned |>
   left_join(frog_names_cleaned, relationship = "many-to-many") |>
+  #make a timecode string for each
+  mutate(
+    datecode = str_remove(event_date, "-\\d{2}$"),
+    timecode = str_remove(event_time, ":.*"),
+
+    datecode = str_remove(datecode, "\\-")
+  ) |>
   separate(
     col = "latin_name",
     into = c("genus", "species"),
@@ -107,7 +114,14 @@ frogmap_data <- frogID_data_cleaned |>
     col = "event_date",
     into = c("year", "month", "day"),
     sep = "-"
-  )
+  ) |>
+  # separate hour, minute, second
+   separate(
+    col = "event_time",
+    into = c("hour", "minute", "second"),
+    sep = ":"
+  ) |>
+  select(-"second")
 #TODO something is making december disappear now....
 
 # make a map of where observations occur for each subfamily
@@ -121,21 +135,14 @@ ggplot(aus_map) +
 
 # make histogram of frog encounters(subfamily, month) per province(stack),
 # this should tell us if there's any difference in monthly reports between the
-ggplot(frogmap_data, aes(y = province,
-                         fill = month)) +
-  geom_histogram(stat = "count")
-
-#how about hour?
-ggplot(frogmap_data, aes(y = province,
-                         fill = hours)) +
-  geom_histogram(stat = "count")
-
-# how does
 ggplot(frogmap_data, aes(y = subfamily,
-                         fill = hours)) +
+                         fill = month)) +
   geom_histogram(stat = "count") +
-  facet_wrap(~ province, scales = "free_y")
+  facet_wrap(~ province, scales = "free")
 # make gif of frog encounters over time
+# make function that adds a group column to gif_frogdata
+
+gif_frogdata <- frogmap_data
 
 # Prepare data for shiny app --------------------
 # map of australia with marks for each frog sighting
