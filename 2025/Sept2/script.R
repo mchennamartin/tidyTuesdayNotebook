@@ -100,9 +100,7 @@ frogmap_data <- frogID_data_cleaned |>
   #make a timecode string for each
   mutate(
     datecode = str_remove(event_date, "-\\d{2}$"),
-    timecode = str_remove(event_time, ":.*"),
-
-    datecode = str_remove(datecode, "\\-")
+    timecode = str_remove(event_time, ":.*")
   ) |>
   separate(
     col = "latin_name",
@@ -127,7 +125,8 @@ frogmap_data <- frogID_data_cleaned |>
 # make a map of where observations occur for each subfamily
 ggplot(aus_map) +
   geom_sf() +
-  geom_point(data = frogmap_data,  size = 0.5,
+  geom_point(data = frogmap_data,
+             size = 0.5,
              aes(x = long,
                  y = lat,
                  color = subfamily)) +
@@ -139,25 +138,6 @@ ggplot(frogmap_data, aes(y = subfamily,
                          fill = month)) +
   geom_histogram(stat = "count") +
   facet_wrap(~ province, scales = "free")
-
-# make gif of frog encounters over time
-max_datecode <- max(as.numeric(frogmap_data$datecode))
-min_datecode <- min(as.numeric(frogmap_data$datecode))
-
-#make a plot for each date
-for(date in min_datecode:max_datecode){
-  temp <- frogmap_data |>
-    filter("datecode" == date)
-  png(paste(date, ".png", sep = ""))
-  ggplot(aus_map) +
-    geom_sf() +
-    geom_point(data = temp,  size = 0.5,
-               aes(x = long,
-                   y = lat,
-                   color = subfamily)) +
-    scale_color_few(palette = "Medium")
-    dev.off()
-   }
 
 # Prepare data for shiny app --------------------
 # map of australia with marks for each frog sighting
