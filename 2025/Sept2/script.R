@@ -1,7 +1,7 @@
 # Initialize ---------------------------
 # Functions
 #function to donwload and load packages if needed
-load <- function(package){
+load <- function(package) {
   # package - character - represents package or packages to install e.g. 'dplyr', 'limma'
   # output - loaded packages, and installed packages if needed
 
@@ -55,7 +55,6 @@ load('sf, maps, tidyverse, here, ggthemes')
 # Read in tables
 frogID_data <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-09-02/frogID_data.csv')
 frog_names <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-09-02/frog_names.csv')
-
 # Tidy up data ------------------------------------
 # Tidy up frogID_data
 new_colnames <- c("occurenceID", "eventID", "lat", "long",
@@ -65,14 +64,6 @@ new_colnames <- c("occurenceID", "eventID", "lat", "long",
 frogID_data_cleaned <- frogID_data |>
   # rename columns to be less cumbersome
   setNames(new_colnames) |>
-  # separate event_time into columns Hours and minutes
-# separate(
-#   col = event_time,
-#   into = c("hours", "minutes", "seconds"),
-#   sep = ":") |>
-# select(-"seconds") |>
-  # fix sigfigs of some columns
-  # reduces size of DataFrame
   mutate(
     userID = str_remove(userID, "\\..*"),
     coord_uncertainty_m = signif(coord_uncertainty_m, digits = 2))
@@ -113,6 +104,7 @@ frogmap_data <- frogID_data_cleaned |>
     into = c("year", "month", "day"),
     sep = "-"
   ) |>
+  #there is no december
   # separate hour, minute, second
    separate(
     col = "event_time",
@@ -130,17 +122,11 @@ ggplot(aus_map) +
              aes(x = long,
                  y = lat,
                  color = subfamily)) +
-  scale_color_few(palette = "Medium")
+  scale_color_few()
 
 # make histogram of frog encounters(subfamily, month) per province(stack),
 # this should tell us if there's any difference in monthly reports between the
-ggplot(frogmap_data, aes(y = subfamily,
+ggplot(frogmap_data, aes(y = province,
                          fill = month)) +
   geom_histogram(stat = "count") +
-  facet_wrap(~ province, scales = "free")
-
-# Prepare data for shiny app --------------------
-# map of australia with marks for each frog sighting
-# shiny app will allow users to pick from frog genus and species
-# visualizes the location and time of year of each sound ID for that subfamily/tribe
-# hovering over the dots should allow user to see/get collection information
+  facet_wrap(~ subfamily, scales = "free")
